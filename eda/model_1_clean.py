@@ -33,7 +33,7 @@ def save_model(data, picklefile):
         pickle.dump(data, f)
 
 
-if __name__ == "__main__":
+if __name__=="__main__":
 
     # specify data types on import
     col_data_types = {'Consumer complaint narrative':np.str_, \
@@ -45,9 +45,13 @@ if __name__ == "__main__":
     df = pd.read_csv('../data/Consumer_Complaints.csv', dtype=col_data_types)
 
     # drop columns that are represented by other columns
+    # NOTE: some of these may need to be included in feature matrix |
+    # The 'Company' feature is too large after creating dummy variables
+    # Need to solve the curse of dimensionality and sparse matrix problems
     df = drop_columns(df, ['Sub-product', 'Sub-issue', \
                     'Consumer complaint narrative', \
-                    'Company public response'])
+                    'Company public response', \
+                    'Company'])
 
     # removes rows with NaN values for state and zip | there are < 5000 NaN rows
     df = remove_nan(df, ['State', 'ZIP code', 'Submitted via'])
@@ -78,10 +82,19 @@ if __name__ == "__main__":
     # dummifies categorical variables
     df_dummy_categories = get_dummies(df, categorical_var)
 
-    print df_dummy_categories.shape
-    # creates initial feature matrix with output column 'Company response to consumer'
-    arrays = np.concatenate((df_dummy_categories.values, df_date_zip_id_bool.values, df['Company response to consumer'].values), axis=1)
-    print 'done'
-    #df_cleaned = pd.concat(frames, axis=1)
+    # print df_date_zip_id_bool.values.shape
+    # print df_dummy_categories.values.shape
+    # print df.values.shape
+    # print df['Company response to consumer'].values\
+    #     .reshape((df['Company response to consumer'].shape[0], 1)).shape
 
-    ## save_model(df_cleaned, '../data/df_feat_mat.pkl')
+    # creates initial feature matrix with output column 'Company response to consumer'
+    feat_mat = np.concatenate((df_date_zip_id_bool.values, \
+                            df_dummy_categories.values, \
+                            df['Company response to consumer'].values\
+                            .reshape((df['Company response to consumer']\
+                            .shape[0],1))), axis=1)
+
+    save_model(feat_mat, '../data/feat_mat.pkl')
+
+    # print 'done'
