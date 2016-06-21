@@ -1,2 +1,3 @@
 Consumer_Complaints.csv
-test.csv
+*.pyc
+*.csv
