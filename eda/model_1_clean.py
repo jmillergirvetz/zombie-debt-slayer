@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import cPickle as pickle
 from datetime import datetime
 
 
@@ -27,6 +28,10 @@ def get_dummies(df, columns=None):
     '''
     return pd.get_dummies(df, dummy_na=True, columns=columns)
 
+def save_model(data, picklefile):
+    with open(picklefile, 'w') as f:
+        pickle.dump(data, f)
+
 
 if __name__ == "__main__":
 
@@ -44,7 +49,7 @@ if __name__ == "__main__":
                     'Consumer complaint narrative', \
                     'Company public response'])
 
-    # removes rows with NaN values for state and zip. There are < 5000 rows
+    # removes rows with NaN values for state and zip | there are < 5000 NaN rows
     df = remove_nan(df, ['State', 'ZIP code', 'Submitted via'])
 
     # creates boolean categorical variables
@@ -55,7 +60,7 @@ if __name__ == "__main__":
     df['Timely response?'] = df['Timely response?']=='Yes'
 
     # drops old columns that have been converted to booleans
-    df = drop_columns(df, ['Tags', 'Consumer disputed?', 'Consumer consent provided?', 'Timely response?'])
+    df = drop_columns(df, ['Tags', 'Consumer disputed?', 'Consumer consent provided?']) #took out "Timely response?"
 
     # creates list of date, zip, and claim id columns
     date_id_zip = ['Date received', 'ZIP code', 'Date sent to company', 'Complaint ID']
@@ -64,11 +69,19 @@ if __name__ == "__main__":
     bool_list = ['Narrative consent provided', 'Timely response?', 'Disputed?', \
                  'Service member', 'Older American']
 
-    # creates list categorical variables to be dummified
+    # creates a dataframe of cleaned date, claim id, zip, and boolean features
+    df_date_zip_id_bool = df[date_id_zip + bool_list]
+
+    # creates list of categorical variables to be dummified
     categorical_var = list(set(df.columns) - set(date_id_zip + bool_list))
 
     # dummifies categorical variables
-    df = get_dummies(df, categorical_var)
+    df_dummy_categories = get_dummies(df, categorical_var)
 
-    print df.shape
-    print len(df.columns)
+    print df_dummy_categories.shape
+    # creates initial feature matrix with output column 'Company response to consumer'
+    arrays = np.concatenate((df_dummy_categories.values, df_date_zip_id_bool.values, df['Company response to consumer'].values), axis=1)
+    print 'done'
+    #df_cleaned = pd.concat(frames, axis=1)
+
+    ## save_model(df_cleaned, '../data/df_feat_mat.pkl')
