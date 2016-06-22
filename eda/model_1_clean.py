@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import cPickle as pickle
-from datetime import datetime
+from sklearn.preprocessing import LabelEncoder
 
 
 def drop_columns(df, columns):
@@ -29,18 +29,21 @@ def get_dummies(df, columns=None):
     return pd.get_dummies(df, dummy_na=True, columns=columns)
 
 def save_model(data, picklefile):
+    '''
+    Function that saves pickled data
+    INPUT: feature matrix with class labels
+    OUTPUT: pickled feature matrix with class labels
+    '''
     with open(picklefile, 'w') as f:
         pickle.dump(data, f)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
 
     # specify data types on import
     col_data_types = {'Consumer complaint narrative':np.str_, \
                       'Company public response':np.str_, \
-                      'Consumer consent provided?':np.str_, \
-                      'Date received':datetime, \
-                      'Date sent to company':datetime}
+                      'Consumer consent provided?':np.str_}
     # load in data
     df = pd.read_csv('../data/Consumer_Complaints.csv', dtype=col_data_types)
 
@@ -49,9 +52,10 @@ if __name__=="__main__":
     # The 'Company' feature is too large after creating dummy variables
     # Need to solve the curse of dimensionality and sparse matrix problems
     df = drop_columns(df, ['Sub-product', 'Sub-issue', \
-                    'Consumer complaint narrative', \
-                    'Company public response', \
-                    'Company'])
+                        'Consumer complaint narrative', \
+                        'Company public response', \
+                        'Company', 'Date sent to company', \
+                        'Date received', 'Complaint ID'])
 
     # removes rows with NaN values for state and zip | there are < 5000 NaN rows
     df = remove_nan(df, ['State', 'ZIP code', 'Submitted via'])
@@ -63,38 +67,45 @@ if __name__=="__main__":
     df['Narrative consent provided'] = df['Consumer consent provided?']=='Consent provided'
     df['Timely response?'] = df['Timely response?']=='Yes'
 
-    # drops old columns that have been converted to booleans
-    df = drop_columns(df, ['Tags', 'Consumer disputed?', 'Consumer consent provided?']) #took out "Timely response?"
+    # encode class labels
+    le = LabelEncoder()
+    label_arr = le.fit_transform(np.array(df['Company response to consumer']))
 
-    # creates list of date, zip, and claim id columns
-    date_id_zip = ['Date received', 'ZIP code', 'Date sent to company', 'Complaint ID']
+    # drops old columns that have been converted to booleans and output labels
+    df = drop_columns(df, ['Tags', 'Consumer disputed?', \
+                            'Consumer consent provided?', \
+                            'Company response to consumer'])
 
     # creates list of boolean categorical variables
-    bool_list = ['Narrative consent provided', 'Timely response?', 'Disputed?', \
-                 'Service member', 'Older American']
+    zip_bool_list = ['ZIP code', 'Narrative consent provided', \
+                    'Timely response?', 'Disputed?', \
+                    'Service member', 'Older American']
 
     # creates a dataframe of cleaned date, claim id, zip, and boolean features
-    df_date_zip_id_bool = df[date_id_zip + bool_list]
+    df_zip_bool = df[zip_bool_list]
 
     # creates list of categorical variables to be dummified
-    categorical_var = list(set(df.columns) - set(date_id_zip + bool_list))
+    categorical_var = list(set(df.columns) - set(zip_bool_list))
 
     # dummifies categorical variables
     df_dummy_categories = get_dummies(df, categorical_var)
 
+
+    #####print block for debugging
     # print df_date_zip_id_bool.values.shape
     # print df_dummy_categories.values.shape
-    # print df.values.shape
+    # print label_arr.shape
+    # print label_arr.reshape((label_arr.shape[0],1)).shape
     # print df['Company response to consumer'].values\
     #     .reshape((df['Company response to consumer'].shape[0], 1)).shape
+    ######
 
-    # creates initial feature matrix with output column 'Company response to consumer'
-    feat_mat = np.concatenate((df_date_zip_id_bool.values, \
+
+    # creates feature matrix with classifcation labels
+    feat_mat = np.concatenate((df_zip_bool.values, \
                             df_dummy_categories.values, \
-                            df['Company response to consumer'].values\
-                            .reshape((df['Company response to consumer']\
-                            .shape[0],1))), axis=1)
+                            label_arr.reshape((label_arr.shape[0],1))), axis=1)
 
     save_model(feat_mat, '../data/feat_mat.pkl')
 
-    # print 'done'
+    save_model(feat_mat[:1000,:], '../data/small_feat_mat.pkl')
