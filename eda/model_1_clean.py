@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import cPickle as pickle
 from sklearn.preprocessing import LabelEncoder
+import json
 
 
 def drop_columns(df, columns):
@@ -37,6 +38,15 @@ def save_model(data, picklefile):
     with open(picklefile, 'w') as f:
         pickle.dump(data, f)
 
+def read_json(jsonfile):
+    '''
+    Function that reads json file
+    INPUT: json file with path
+    OUTPUT: json dictionary
+    '''
+    with open(jsonfile, 'r') as f:
+        data = json.load(f)
+    return data
 
 if __name__ == "__main__":
 
@@ -46,6 +56,8 @@ if __name__ == "__main__":
                       'Consumer consent provided?':np.str_}
     # load in data
     df = pd.read_csv('../data/Consumer_Complaints.csv', dtype=col_data_types)
+
+    state_dict = read_json('../data/red_blue_states.json')
 
     # drop columns that are represented by other columns
     # NOTE: some of these may need to be included in feature matrix |
@@ -66,46 +78,37 @@ if __name__ == "__main__":
     df['Disputed?'] = df['Consumer disputed?'].str.contains('Yes').replace(np.nan, False)
     df['Narrative consent provided'] = df['Consumer consent provided?']=='Consent provided'
     df['Timely response?'] = df['Timely response?']=='Yes'
+    df['ZIP code'] = df['ZIP code'].apply(lambda x: str(x)[:3])
+    df['State'] = df['State'].replace(state_dict)
 
     # encode class labels
     le = LabelEncoder()
     label_arr = le.fit_transform(np.array(df['Company response to consumer']))
-
+    df['Labels'] = pd.DataFrame(label_arr)
     # drops old columns that have been converted to booleans and output labels
     df = drop_columns(df, ['Tags', 'Consumer disputed?', \
                             'Consumer consent provided?', \
                             'Company response to consumer'])
 
     # creates list of boolean categorical variables
-    zip_bool_list = ['ZIP code', 'Narrative consent provided', \
+    zip_bool_set = {'ZIP code', 'Narrative consent provided', \
                     'Timely response?', 'Disputed?', \
-                    'Service member', 'Older American']
-
-    # creates a dataframe of cleaned date, claim id, zip, and boolean features
-    df_zip_bool = df[zip_bool_list]
+                    'Service member', 'Older American'}
 
     # creates list of categorical variables to be dummified
-    categorical_var = list(set(df.columns) - set(zip_bool_list))
+    categorical_var = list(set(df.columns) - zip_bool_set - {'Labels'})
 
     # dummifies categorical variables
     df_dummy_categories = get_dummies(df, categorical_var)
 
+    df_dummy_categories = remove_nan(df_dummy_categories, ['Labels'])
 
-    #####print block for debugging
-    # print df_date_zip_id_bool.values.shape
-    # print df_dummy_categories.values.shape
-    # print label_arr.shape
-    # print label_arr.reshape((label_arr.shape[0],1)).shape
-    # print df['Company response to consumer'].values\
-    #     .reshape((df['Company response to consumer'].shape[0], 1)).shape
-    ######
-
-
+    print 'labels nans', df_dummy_categories['Labels'].isnull().sum()
+    print 'df dummy check', df_dummy_categories.shape
     # creates feature matrix with classifcation labels
-    feat_mat = np.concatenate((df_zip_bool.values, \
-                            df_dummy_categories.values, \
-                            label_arr.reshape((label_arr.shape[0],1))), axis=1)
+    #df_feat_mat = pd.concat((df_dummy_categories, df['Labels']), axis=1)
 
-    save_model(feat_mat, '../data/feat_mat.pkl')
+    # pickle cleaned dataframe
+    #save_model(df_feat_mat, '../data/feat_mat.pkl')
 
-    save_model(feat_mat[:1000,:], '../data/small_feat_mat.pkl')
+    save_model(df_dummy_categories.sample(n=10000, random_state=1), '../data/small_feat_mat.pkl')
