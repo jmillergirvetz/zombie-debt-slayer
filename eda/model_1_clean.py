@@ -3,47 +3,48 @@ import numpy as np
 import cPickle as pickle
 from sklearn.preprocessing import LabelEncoder
 import json
-
+from unbalanced_dataset import over_sampling
+from oversample import random_over_sample
 
 def drop_columns(df, columns):
-    '''
+    """
     Function that drops specified columns
     INPUT: dataframe and list of columns
     OUTPUT: cleaned dataframe
-    '''
+    """
     return df.drop(columns, axis=1)
 
 def remove_nan(df, columns):
-    '''
+    """
     Function that drops specified rows of dataframe that have NaN values
     INPUT: dataframe and list of columns that specify which NaN values to drop
     OUTPUT: cleaned dataframe
-    '''
+    """
     return df.dropna(axis=0, subset=np.array(columns))
 
 def get_dummies(df, columns=None):
-    '''
+    """
     Function that creates dummie variables for categorical variables
     INPUT: dataframe
     OUTPUT: dataframe with dummy variables
-    '''
+    """
     return pd.get_dummies(df, dummy_na=True, columns=columns)
 
 def save_model(data, picklefile):
-    '''
+    """
     Function that saves pickled data
     INPUT: feature matrix with class labels
     OUTPUT: pickled feature matrix with class labels
-    '''
+    """
     with open(picklefile, 'w') as f:
         pickle.dump(data, f)
 
 def read_json(jsonfile):
-    '''
+    """
     Function that reads json file
     INPUT: json file with path
     OUTPUT: json dictionary
-    '''
+    """
     with open(jsonfile, 'r') as f:
         data = json.load(f)
     return data
@@ -78,25 +79,36 @@ if __name__ == "__main__":
     df['Disputed?'] = df['Consumer disputed?'].str.contains('Yes').replace(np.nan, False)
     df['Narrative consent provided'] = df['Consumer consent provided?']=='Consent provided'
     df['Timely response?'] = df['Timely response?']=='Yes'
-    df['ZIP code'] = df['ZIP code'].apply(lambda x: str(x)[:3])
+    df['ZIP code'] = df['ZIP code'].apply(lambda x: str(x)[:1])
     df['State'] = df['State'].replace(state_dict)
+    df['Labels'] = df['Company response to consumer']\
+                            .replace({'Closed with non-monetary relief':0., \
+                                    'Closed with explanation':2.,\
+                                    'Closed with monetary relief':1., \
+                                    'Closed':2., \
+                                    'Untimely response':.2, \
+                                    'In progress':.2, \
+                                    'Closed with relief':1., \
+                                    'Closed without relief':0.})
 
-    # encode class labels
-    le = LabelEncoder()
-    label_arr = le.fit_transform(np.array(df['Company response to consumer']))
-    df['Labels'] = pd.DataFrame(label_arr)
+    # # encode class labels: used for encoding multi-classes if applicable
+    # le = LabelEncoder()
+    # label_arr = le.fit_transform(np.array(df['Company response to consumer']))
+    # df['Labels'] = pd.DataFrame(label_arr)
+
     # drops old columns that have been converted to booleans and output labels
     df = drop_columns(df, ['Tags', 'Consumer disputed?', \
                             'Consumer consent provided?', \
                             'Company response to consumer'])
 
+
     # creates list of boolean categorical variables
-    zip_bool_set = {'ZIP code', 'Narrative consent provided', \
-                    'Timely response?', 'Disputed?', \
-                    'Service member', 'Older American'}
+    bool_set = {'Narrative consent provided', \
+                'Timely response?', 'Disputed?', \
+                'Service member', 'Older American'}
 
     # creates list of categorical variables to be dummified
-    categorical_var = list(set(df.columns) - zip_bool_set - {'Labels'})
+    categorical_var = list(set(df.columns) - bool_set - {'Labels'})
 
     # dummifies categorical variables
     df_dummy_categories = get_dummies(df, categorical_var)
