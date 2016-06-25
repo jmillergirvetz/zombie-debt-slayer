@@ -1,10 +1,11 @@
+###Module to preprocess data###
 import pandas as pd
 import numpy as np
-import cPickle as pickle
+
 from sklearn.preprocessing import LabelEncoder
+
+import cPickle as pickle
 import json
-from unbalanced_dataset import over_sampling
-from oversample import random_over_sample
 
 def drop_columns(df, columns):
     """
@@ -79,15 +80,15 @@ if __name__ == "__main__":
     df['Disputed?'] = df['Consumer disputed?'].str.contains('Yes').replace(np.nan, False)
     df['Narrative consent provided'] = df['Consumer consent provided?']=='Consent provided'
     df['Timely response?'] = df['Timely response?']=='Yes'
-    df['ZIP code'] = df['ZIP code'].apply(lambda x: str(x)[:1])
+    df['ZIP code'] = df['ZIP code'].apply(lambda x: str(x)[:3])
     df['State'] = df['State'].replace(state_dict)
     df['Labels'] = df['Company response to consumer']\
                             .replace({'Closed with non-monetary relief':0., \
                                     'Closed with explanation':2.,\
                                     'Closed with monetary relief':1., \
                                     'Closed':2., \
-                                    'Untimely response':.2, \
-                                    'In progress':.2, \
+                                    'Untimely response':2., \
+                                    'In progress':2., \
                                     'Closed with relief':1., \
                                     'Closed without relief':0.})
 
@@ -101,10 +102,8 @@ if __name__ == "__main__":
                             'Consumer consent provided?', \
                             'Company response to consumer'])
 
-
     # creates list of boolean categorical variables
-    bool_set = {'Narrative consent provided', \
-                'Timely response?', 'Disputed?', \
+    bool_set = {'Narrative consent provided', 'Timely response?', 'Disputed?', \
                 'Service member', 'Older American'}
 
     # creates list of categorical variables to be dummified
@@ -113,14 +112,20 @@ if __name__ == "__main__":
     # dummifies categorical variables
     df_dummy_categories = get_dummies(df, categorical_var)
 
+    # checks and removes "Lables" rows with null or corrupted data types
+    print 'Check: "Label" # null values before removal: ', \
+                                df_dummy_categories['Labels'].isnull().sum()
+
     df_dummy_categories = remove_nan(df_dummy_categories, ['Labels'])
 
-    print 'labels nans', df_dummy_categories['Labels'].isnull().sum()
-    print 'df dummy check', df_dummy_categories.shape
-    # creates feature matrix with classifcation labels
-    #df_feat_mat = pd.concat((df_dummy_categories, df['Labels']), axis=1)
+    print
+    print 'Check: "Label" # null values after removal: ', \
+                                df_dummy_categories['Labels'].isnull().sum()
+
+    print
+    print 'Cleaned dataframes dimensions:', df_dummy_categories.shape
 
     # pickle cleaned dataframe
-    #save_model(df_feat_mat, '../data/feat_mat.pkl')
+    # save_model(df_feat_mat, '../data/feat_mat.pkl')
 
     save_model(df_dummy_categories.sample(n=10000, random_state=1), '../data/small_feat_mat.pkl')
