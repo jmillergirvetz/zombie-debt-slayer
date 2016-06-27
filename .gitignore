@@ -1,3 +1,4 @@
 Consumer_Complaints.csv
 *.pyc
 *.csv
+*.ipynb_checkpoints

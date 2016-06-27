@@ -31,7 +31,14 @@ def get_dummies(df, columns=None):
     """
     return pd.get_dummies(df, dummy_na=True, columns=columns)
 
-def save_model(data, picklefile):
+def create_year_only(df, date_col='Date received'):
+    # function thats create a 'Year only' column
+    df[date_col] = df[date_col].apply(lambda x: str(x))
+    df[date_col] = pd.to_datetime(df[date_col])
+    df['Year only'] = pd.DatetimeIndex(df[date_col]).year
+    return df
+
+def save_pickle(data, picklefile):
     """
     Function that saves pickled data
     INPUT: feature matrix with class labels
@@ -59,17 +66,14 @@ if __name__ == "__main__":
     # load in data
     df = pd.read_csv('../data/Consumer_Complaints.csv', dtype=col_data_types)
 
+    # load in dictionary of states and 2012 presidential election results
     state_dict = read_json('../data/red_blue_states.json')
 
     # drop columns that are represented by other columns
-    # NOTE: some of these may need to be included in feature matrix |
-    # The 'Company' feature is too large after creating dummy variables
-    # Need to solve the curse of dimensionality and sparse matrix problems
     df = drop_columns(df, ['Sub-product', 'Sub-issue', \
-                        'Consumer complaint narrative', \
                         'Company public response', \
                         'Company', 'Date sent to company', \
-                        'Date received', 'Complaint ID'])
+                        'Complaint ID'])
 
     # removes rows with NaN values for state and zip | there are < 5000 NaN rows
     df = remove_nan(df, ['State', 'ZIP code', 'Submitted via'])
@@ -92,40 +96,40 @@ if __name__ == "__main__":
                                     'Closed with relief':1., \
                                     'Closed without relief':0.})
 
-    # # encode class labels: used for encoding multi-classes if applicable
-    # le = LabelEncoder()
-    # label_arr = le.fit_transform(np.array(df['Company response to consumer']))
-    # df['Labels'] = pd.DataFrame(label_arr)
-
     # drops old columns that have been converted to booleans and output labels
     df = drop_columns(df, ['Tags', 'Consumer disputed?', \
                             'Consumer consent provided?', \
                             'Company response to consumer'])
 
-    # creates list of boolean categorical variables
+    # creates set of boolean categorical variables
     bool_set = {'Narrative consent provided', 'Timely response?', 'Disputed?', \
                 'Service member', 'Older American'}
 
+    # creates set of holdout features and output to be processed later
+    date_narr_label = {'Labels', 'Date received', 'Consumer complaint narrative'}
+
     # creates list of categorical variables to be dummified
-    categorical_var = list(set(df.columns) - bool_set - {'Labels'})
+    categorical_var = list(set(df.columns) - bool_set - date_narr_label)
 
     # dummifies categorical variables
     df_dummy_categories = get_dummies(df, categorical_var)
 
+    # creates datetime64 year only column
+    df = create_year_only(df_dummy_categories, date_col='Date received')
+
     # checks and removes "Lables" rows with null or corrupted data types
     print 'Check: "Label" # null values before removal: ', \
-                                df_dummy_categories['Labels'].isnull().sum()
+                                df['Labels'].isnull().sum()
 
-    df_dummy_categories = remove_nan(df_dummy_categories, ['Labels'])
+    df = remove_nan(df, ['Labels'])
 
     print
     print 'Check: "Label" # null values after removal: ', \
-                                df_dummy_categories['Labels'].isnull().sum()
+                                df['Labels'].isnull().sum()
 
     print
-    print 'Cleaned dataframes dimensions:', df_dummy_categories.shape
+    print 'Cleaned dataframes dimensions:', df.shape
 
     # pickle cleaned dataframe
-    # save_model(df_feat_mat, '../data/feat_mat.pkl')
-
-    save_model(df_dummy_categories.sample(n=10000, random_state=1), '../data/small_feat_mat.pkl')
+    # save_model(df_feat_mat, '../data/feat_mat_v1.pkl')
+    save_pickle(df.sample(n=10000, random_state=1), '../data/small_feat_mat_v1.pkl')
