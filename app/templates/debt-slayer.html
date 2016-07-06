@@ -3,14 +3,108 @@
 
 <!-- we're in the body-->
 
-<div>Welcome to the Debt Slayer page!</div>
 <div>
-  <form action="/debt-slayer" method='post'>
-    Enter Zip
-    <input type="text" name="zip" /><br>
-    Type - or copy and paste your text:<br>
-    <input type="text" name="narr" /><br>
-    <input type="submit" />
-  </form>
+  <form class="form-horizontal">
+  <fieldset>
+    <legend>Debt Slayer</legend>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">Complaint ID</label>
+      <div class="col-lg-10">
+        <input type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">Product</label>
+      <div class="col-lg-10">
+        <input type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">Issue</label>
+      <div class="col-lg-10">
+        <input type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="textArea" class="col-lg-2 control-label">Complaint Narrative</label>
+      <div class="col-lg-10">
+        <br>
+        <span class="help-block">Please consider using a formal and polite writing style.
+        Writing with punctuation and proper formatting can improve your likelihood of forgiveness. </span>
+        <textarea class="form-control" rows="3" id="textArea"></textarea>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">Company</label>
+      <div class="col-lg-10">
+        <input type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">State</label>
+      <div class="col-lg-10">
+        <input type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">ZIP Code</label>
+      <div class="col-lg-10">
+        <input type="text" class="form-control">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">Service Member</label>
+      <div class="col-lg-10">
+        <div class="radio">
+          <label>
+            <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked="">
+            Yes
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+            No
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">Older American</label>
+      <div class="col-lg-10">
+        <div class="radio">
+          <label>
+            <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked="">
+            Yes
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+            No
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="select" class="col-lg-2 control-label">Submitted Via</label>
+      <div class="col-lg-10">
+        <select class="form-control" id="select">
+          <option>Fax</option>
+          <option>Phone</option>
+          <option>Postal Mail</option>
+          <option>Referral</option>
+          <option>Web</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-lg-10 col-lg-offset-2">
+        <button type="reset" class="btn btn-default">Cancel</button>
+        <button type="submit" class="btn btn-success">Submit</button>
+      </div>
+    </div>
+  </fieldset>
+</form>
 </div>
 {% endblock %}

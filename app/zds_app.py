@@ -55,7 +55,7 @@ def debt_slayer():
         # apply cleaning to it
         zip_code = np.array[str(request.form['zip'])]
         # apply cleaning to it
-        rf = load_pickle('../data/random_forest.pkl')
+        rf = load_pickle('../data/rf_model.pkl')
         x_transform = rf.transform(x)
         rf_pred = rf.predict(x_transform)
 
