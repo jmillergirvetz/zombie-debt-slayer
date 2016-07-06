@@ -1,3 +1,4 @@
+###Modeule to create train test split and random oversampling###
 import pandas as pd
 import numpy as np
 import unidecode
@@ -20,12 +21,22 @@ def train_test_sets(X, y):
     return X_train, X_test, y_train, y_test
 
 def merge_dataframes(df, df1):
+    """
+    Function that merges dataframes used to build number of complaints per year
+    INPUT: two dataframes
+    OUTPUT: dataframe
+    """
     cols = list(set(df1.columns) - {'Company', 'Consumer complaint narrative', \
                                     'Date received'})
     result = pd.merge(df, df1, how='left', on=cols)
     return result
 
 def convert_text(text):
+    """
+    Function that converts text to unicode and checks if there are empty strings
+    INPUT: text from the consumer complaint narratives
+    OUTPUT: original text plus tag for empty strings
+    """
     if (text == ''):
         print "FOUND MISSING TEXT"
         return "--MISSING INFO--"
@@ -44,7 +55,6 @@ if __name__ == "__main__":
     df['Company'] = df['Company'].apply(lambda x: convert_text(x))
     df['Consumer complaint narrative'] = df['Consumer complaint narrative']\
                                          .apply(lambda x: convert_text(x))
-    # there were no --MISSING INFO-- values (see convert_text function)
 
     # create X feature matrix and y output labels and drop any unwanted columns
     y = df.pop('Labels')
