@@ -10,34 +10,66 @@ from init_model_clean import drop_columns, save_pickle
 import cPickle as pickle
 
 
-rude_vocab = \
-  set(['I will not', 'I won\'t', 'I am not going', 'I cant', 'I can\'t', \
-  'I can not', 'corrupt', 'without hearing', 'illegal', 'make me', \
-  'harassing', 'harass', 'harassment', 'ridiculous', 'nutshell', \
-  'We certainly know', 'poor credit', 'credit being poor', 'delete', \
-  'statute of limitations', 'impossible to deal', 'without telling me', \
-  'I \'m not asking you for advice', 'I ca n\'t', 'deleted', ''])
-
 polite_vocab = \
-  set(['implying', 'allowed', 'protested', 'dismissed', 'technicality', 'innacurate', \
-  'law', 'incorrect', 'reporting', 'contract', 'agreed', 'Passport', 'agreement', \
-  'assured', 'reluctantly', 'paperwork', 'attempted', 'terms', 'resolution', \
-  'initiate', 'detailed', 'letter', 'receipt', 'dispute', 'proof', 'admitted', \
-  'verification', 'verify', 'threatening', 'notary', 'notarized', 'ordered' \
-  'requested', 'responsibility', 'hardship', 'assured', 'official', 'forbearance', \
-  'exploitative', 'unauthorized', 'passed away', 'single mother', 'single father', \
-  'case number', 'disputed', 'grateful', 'opportunity', 'research', 'shocking', \
-  'unethical', 'resorted', 'report', 'reported', 'target', 'despite', 'cosigner', \
-  'taken advantage', 'took advantage', 'student', 'graduate', 'consolidate', \
-  'burden', 'Act', 'request', 'validation', 'contractual', 'obligation', \
-  'invalidated', 'constitute', 'condescending', 'crying', 'tears', 'threats', \
-  'activist', 'threaten', 'harassment', 'endure', 'ineffectual', 'letter', 'vicious', \
-  'never received', 'followed up', 'rectified', 'confirmation', 'confirming', \
-  'on file', 'notes', 'evidence', 'predatory', 'violation', 'section', \
-  'documentation', 'no avail', 'tried', 'requisition', 'statements', 'contracts', \
-  'pertinent', 'validity', 'qualifications', 'misleading', 'fake', 'false', \
-  'paperwork', 'communication', 'instructed', 'inconvenient', 'inconvenience', \
-  'correspondence', 'laboriously', 'proving', 'blemish', 'fraudulent', 'never'])
+  set(['allegedly', 'perhaps', 'I love', 'I feel as if', 'email them for help', \
+       'I would like my debt cleared', 'I have contacted them many times', \
+       'we have been very loyal customers', 'we trusted them', \
+       'please help us', 'this is a lot of money', \
+       'would not have agreed had we known', \
+       'the gentleman who helped me', 'thank you', \
+       'I submitted a complaint', 'I requested', 'I explained', \
+       'It was my understanding', 'not acceptable', 'please', 'reach out', \
+       'please help me', 'hello', 'I asked', 'work with me', \
+       'I am not refusing', 'tried to resolve', 'appropriate', \
+       'reached out', 'availability to assist','responsibly', \
+       'completely understand', 'pleasant', 'Thank you', 'documentation'])
+
+formal_vocab = \
+  set(['benefits', 'closed unexpectedly', 'I was required to pay', \
+       'I was not told', 'I am on a fixed budget', 'due to merchant error', \
+       'not get an accurate understanding', 'I called them multiple times', \
+       'overdraft fee', ', I was advised', 'excessive', 'subsequent', \
+       'customer courtesy', 'compromised', 'to no avail', 'disputed', \
+       'discreprency', 'reinstatement', 'forbearance', 'to assure me as such',
+       'reiterated', 'obligations', 'proprietary', 'substantial', 'forfeited'])
+
+rude_vocab = \
+  set(['violated', 'serious breach', 'demanding', 'fraudulent', 'robbery', \
+       'unfair business practice', 'this is ridiculous','flabbergasted', \
+       'was not helpful', 'made up crazy story', 'getting the run around', \
+       'victim', 'fraud', 'MORE', 'lie', 'false', 'conflicting information', \
+       'failed', 'attacking', 'rude', 'arguing', 'abusing', 'disputing', \
+       'demanding', 'shocking', 'trick', 'irresponsibly', 'incompetent', \
+       'poor practice', 'ignored', 'fraudulently', 'extorted', 'extortionist', \
+       'extorting', 'harassed', 'serious breach', 'horror', 'illegal', \
+       'I DID NOT GIVE MY PERMISSION', 'incompitent', 'incompetent', \
+       'misrepresented', 'refused', 'liar', 'lier','lied', 'lying', 'insane', \
+       'negligent', 'foolishness', 'damaging', 'derogatory', 'worse at this', \
+       'unethical', 'harassing', 'negative', 'rude', 'interrupted', 'hung up', \
+       'sue', 'unfairly', 'violated', 'deprive', 'refusing', 'misleading', \
+       'commingled', 'direct opposition', 'manipulating',  'threatened', \
+       'insulting', 'unacceptable', 'aggravated', 'hostile', 'dysfunctional', \
+       'untrustworthy', ';wishing scam', 'suffered', 'disappointing', \
+       'hung up', 'steal', 'collusion', 'wastes time',  'fake'])
+
+informal_vocab = \
+  set(['I totally don\'t get', 'ASAP', 'don\'t know what to do', \
+  'not allowing me to fix it', 'will not update', 'can\'t access', \
+  'it isn\'t fair', 'freaked out', 'no reason', 'bugging us', 'so called', \
+  'lip service', 'fruitless', 'place on long holds', 'shocked', 'surprise', \
+  'fix', 'fixed', 'come to find out', 'messed up', 'Never lived', 'Never had', \
+  'can\'t believe', 'NOT', 'NEVER', 'worried', 'i don\'t get any assistance',  \
+  'fair', 'wrong', 'hung up', 'strikes and their out', 'run around', \
+  'supposed to', 'quick fix', 'back to square one', 'screwed up', 'mess', \
+  'didn\'t give me anything', 'want this to stop', 'burden', \
+  'couldn\'t get to my funds', 'NONO', 'in my book',  'bogged down', \
+  'stressed out', 'last ditch effort', 'screwed', \
+  'Please, somebody out there help me!', 'does not give you anything', 'sucks', \
+  'headaches','run around', 'don\'t live up to', 'what is this??', 'annoying', \
+  'no desire to speak', 'bewilderment', 'going in circles', 'Its NOT right', \
+  'Something need to be done', 'bogus charges', 'don\'t feel comfortable', \
+  'Sadly', 'devastated'])
+
 
 def load_pickle(picklefile):
     """
@@ -80,20 +112,25 @@ def create_complaints(df, columns=['Company', 'Year only'], orig_date_col='Date 
     df2 = pd.merge(df, df1, how='left', on=['Company', 'Year only'])
     return df2
 
-def count_polite_rude(text, polite=True):
+def count_polite_rude(text):
     count = 0
-    if polite == True:
-        for word in polite_vocab:
-            if word in text:
-                count += 1
-        return count
-    elif polite == False:
-        for word in rude_vocab:
-            if word in text:
-                count += 1
-        return count
-    else:
-        print "Select paramter: polite = True | False"
+    for word in polite_vocab:
+        if word in text:
+            count += 1
+    for word in rude_vocab:
+        if word in text:
+            count -= 1
+    return count
+
+def count_formal_informal(text):
+    count = 0
+    for word in formal_vocab:
+        if word in text:
+            count += 1
+    for word in informal_vocab:
+        if word in text:
+            count -= 1
+    return count
 
 def count_punctuation(text):
     count = 0
@@ -105,8 +142,10 @@ def count_punctuation(text):
 
 def count_I(text):
     count = 0
-    if ' I ' in text:
-        count += 1
+    first_person = ['I', 'me', 'Me', 'my', 'My', 'mine', 'Mine']
+    for word in first_person:
+        if word in text:
+            count += 1
     return count
 
 def text_polarity(text):
@@ -157,26 +196,34 @@ if __name__ == '__main__':
     # calculate politness metric and create polite column
     # train
     df_train['Polite'] = df_train['Consumer complaint narrative']\
-                                        .apply(lambda x: count_polite_rude(x))
+                        .apply(lambda x: count_polite_rude(x) / float(len(x)))
     # test
     df_test['Polite'] = df_test['Consumer complaint narrative']\
-                                        .apply(lambda x: count_polite_rude(x))
+                        .apply(lambda x: count_polite_rude(x) / float(len(x)))
+
+    # calculate politness metric and create polite column
+    # train
+    df_train['Formal'] = df_train['Consumer complaint narrative']\
+                    .apply(lambda x: count_formal_informal(x) / float(len(x)))
+    # test
+    df_test['Formal'] = df_test['Consumer complaint narrative']\
+                    .apply(lambda x: count_formal_informal(x) / float(len(x)))
 
     # calculate punctuation
     # train
     df_train['Punctuation'] = df_train['Consumer complaint narrative']\
-                                        .apply(lambda x: count_punctuation(x))
+                        .apply(lambda x: count_punctuation(x) / float(len(x)))
     # test
     df_test['Punctuation'] = df_test['Consumer complaint narrative']\
-                                        .apply(lambda x: count_punctuation(x))
+                        .apply(lambda x: count_punctuation(x) / float(len(x)))
 
-    # count the number of times " I " appears in text
+    # count the number of times of first person occurances
     # train
     df_train['First person count'] = df_train['Consumer complaint narrative']\
-                                        .apply(lambda x: count_I(x))
+                                    .apply(lambda x: count_I(x) / float(len(x)))
     # test
     df_test['First person count'] = df_test['Consumer complaint narrative']\
-                                        .apply(lambda x: count_I(x))
+                                    .apply(lambda x: count_I(x) / float(len(x)))
 
     # calculate text blob polarity
     # train
@@ -198,4 +245,4 @@ if __name__ == '__main__':
     dict_train_test = {'df_train':df_train, 'df_test':df_test}
 
     # save pickled dataframe
-    save_pickle(dict_train_test, '../data/feat_engineer_v2.pkl')
+    save_pickle(dict_train_test, '../data/feat_engineer.pkl')
