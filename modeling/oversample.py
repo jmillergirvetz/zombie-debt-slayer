@@ -1,4 +1,4 @@
-###Module to oversample: https://github.com/fmfn/UnbalancedDataset###
+###Module to random oversample: https://github.com/fmfn/UnbalancedDataset###
 import pandas as pd
 import numpy as np
 
@@ -16,7 +16,3 @@ def random_over_sample(X, y):
     X_resampled, y_resampled = ros.transform(X, y)
 
     return X_resampled, y_resampled
-
-
-if __name__ == '__main__':
-    main()
