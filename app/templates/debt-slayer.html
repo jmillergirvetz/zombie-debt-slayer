@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block body %}
+
+<!-- we're in the body-->
+
+<div>Welcome to the Debt Slayer page!</div>
+<div>
+  <form action="/debt-slayer" method='post'>
+    Enter Zip
+    <input type="text" name="zip" /><br>
+    Type - or copy and paste your text:<br>
+    <input type="text" name="narr" /><br>
+    <input type="submit" />
+  </form>
+</div>
+{% endblock %}
