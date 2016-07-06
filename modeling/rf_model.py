@@ -1,4 +1,4 @@
-###Module to model - LogRegCV, RF, XGBC, SVM with poly & rbf kernels###
+###Module to model Random Forest Classifier on dataset###
 import pandas as pd
 import numpy as np
 from collections import Counter
@@ -139,7 +139,7 @@ def build_model(X_train, X_test, y_train, y_test, model, grid_search=None, \
 if __name__ == "__main__":
 
     # loads train test sets dictionary
-    dict_train_test = load_pickle('../data/feat_engineer_v2.pkl')
+    dict_train_test = load_pickle('../data/feat_engineer.pkl')
 
     # unpack train and test dictionary
     df_train, df_test = dict_train_test['df_train'], dict_train_test['df_test']
@@ -169,7 +169,7 @@ if __name__ == "__main__":
                            precision=True, recall={1:0.05})
 
     # pickles the model and predictions
-    save_pickle(rf_2_pkl, '../data/random_forest_v2.pkl')
+    save_pickle(rf_2_pkl, '../data/random_forest.pkl')
 
     save_pickle(y_pred, '../data/predictions.pkl')
 
