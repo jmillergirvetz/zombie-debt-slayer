@@ -1,11 +1,10 @@
+###Zombie Debt Slayer Flask Application###
 import flask
 from flask import Flask, render_template, request, jsonify
 import logging
 from logging import Formatter, FileHandler
-#from forms import *
 import os
 import pymongo
-#import predict
 import json
 import time
 from datetime import datetime
@@ -23,17 +22,10 @@ import numpy as np
 
 app = Flask(__name__)
 
-# app.config.from_object('config')
-# PORT = 5353
-# REGISTER_URL = "http://10.3.32.217:5000/register"
-# DATA = []
-# TIMESTAMP = []
 
 client = pymongo.MongoClient()
 db = client['zombie-debt-slayer']
 coll = db['debts']
-
-# model = predict.get_model()
 
 #----------------------------------------------------------------------------#
 # Launch.
